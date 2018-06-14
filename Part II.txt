@@ -1,0 +1,143 @@
+C:\neo4j\neo4j-community-3.5.0-alpha01\bin .\neo4j console
+
+match(n) return n
+match(n) optional match(n)-[r]-() return n, r
+
+*** SE ELIMINA TODA LA BDs
+match(n) optional match(n)-[r]-() delete n, r
+
+match (a :Student) --> (b :Provider) return a, b
+match (a :Student) <-- (b :Provider) return a, b
+match (a :Student) -- (b :Provider) return a, b
+
+match (a)-->(b)-->(c) return a,b,c
+match (a :Provider)-[:PUBLISHED]->(b :Course)-[:INSTRUCTED_BY]->(c :Instructor) return a,b,c
+match (a :Provider)-[:PUBLISHED]-(b :Course)-[:INSTRUCTED_BY]-(c :Instructor) return a,b,c
+
+match (a :Student)-->(b :Course)<--(c :Provider) return a,b,c
+match (a :Student)-[:ENROLLED_IN]->(b :Course)<-[:PUBLISHED]-(c :Provider) return a,b,c
+match (a :Student)-[r:ENROLLED_IN]->(b :Course)<-[r1:PUBLISHED]-(c :Provider) return a,type(r),b,type(r1),c
+
+match (s :Student)-[:ENROLLED_IN]->(c :Course) return AVG(s.age) as avgAge, c order by avgAge desc
+
+*** WITH clause
+match (s :Student)-[:ENROLLED_IN]->(c :Course) with AVG(s.age) as avgAge, c where avgAge >= 25 return avgAge, c order by avgAge desc
+match (s :Student)-[:ENROLLED_IN]->(c :Course) with AVG(s.age) as avgAge, c order by avgAge desc limit 1 optional match(c)<-[pb :PUBLISHED]-(:Provider) return c.title, pb.year
+
+match (i :Instructor) return count(*)
+match (i :Instructor) return i
+match (i :Instructor) return i, count(i.age)
+
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p, s
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return count(*)
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p, count(s)
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p as provider, count(s) as NoOfStudents
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return s as student, count(p) as NoOfProviders
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return max(s.age)
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return max(s.age) as maxTotalAge
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p, max(s.age) as maxStudentAgeForProvider
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with max(s.age) as maxStudentAgeForProvider, p return p, maxStudentAgeForProvider
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with max(s.age) as maxStudentAgeForProvider, min(s.age) as minStudentForProvider, p return p, minStudentForProvider, maxStudentAgeForProvider
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with max(s.age) as maxStudentAgeForProvider, min(s.age) as minStudentForProvider, sum(s.age) as sumOfAges, avg(s.age) as averageAge, p return p, minStudentForProvider, maxStudentAgeForProvider, sumOfAges, averageAge
+
+*** COLLECT Functions
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return collect(s.age)
+This is the result: [23,23,24,25,24,24,22,21,24,25,25,36,26,20,26]
+
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p, collect(s.age)
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) return p.name, collect(s.age)
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with p, collect(s.age) as ages return ages
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with p, collect(s.age) as ages return p, ages
+-- the same result
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with p, collect(s.age) as ages return p.name, reduce(totalAge=0, age IN ages | totalAge + age) as totalAges
+match (p :Provider)<-[:HAS_REGISTERED]-(s:Student) with p, collect(s.age) as ages, sum(s.age) as sumAges return p.name, reduce(totalAge=0, age IN ages | totalAge + age) as totalAges, sumAges
+
+*** REDUCE, EXTRACT, FILTER
+return reduce(totalAge=0, i IN [22,34,21,35] | totalAge + i) as totalAges
+
+return extract(i IN [22,34,21,35] | i*2) as doubleUp
+return extract(i IN [22,34,21,35] | "Tag:" + i*2) as doubleUp
+
+-- nice
+match paths=(p :Provider)<-[:HAS_REGISTERED]-(s :Student) return extract(node in nodes(paths) | labels(node) + node.name) as labels
+
+-- nice
+return filter(i IN [22,34,21,35] where i%2 = 0) as evens
+match paths=(p :Provider)<-[:HAS_REGISTERED]-(s :Student) return filter(node in nodes(paths) where node:Student) as studentNodes
+
+*** Variable Length Paths
+match p=(:Student {name:"Bill"})-->(:Course) return p
+match p=(:Student {name:"Bill"})-[*1]->(:Course) return p
+match p=(:Student {name:"Bill"})-[*1..2]->(:Course) return p
+match p=(s :Student {name:"Bill"})-->()-->(s2 :Instructor) return p
+match p=(s :Student {name:"Bill"})-[:ENROLLED_IN]->(:Course)-[:INSTRUCTED_BY]->(s2 :Instructor) return p
+match p=(:Student {name:"Bill"})-[*2]->(:Instructor) return p
+match p=(:Student {name:"Bill"})-[*2]-(:Instructor) return p
+match p=(:Student {name:"Bill"})-[*3]-(:Instructor) return p
+
+match p=(:Student {name:"Bill"})-[:HAS_REGISTERED]->(:Provider)-[:PUBLISHED]->(:Course)-[:INSTRUCTED_BY]->(:Instructor) return p
+
+match p=(:Student {name:"Bill"})-[*1..3]-(:Instructor) return p
+
+-- nice
+match p=(:Student {name:"Bill"})-[*1..3]-(:Instructor) return length(p)
+match p=(:Student {name:"Bill"})-[:HAS_REGISTERED*1..3]-(:Instructor) return length(p)
+match p=(:Student {name:"Bill"})-[:HAS_REGISTERED*]-(:Instructor) return length(p)
+match p=shortestPath((s :Student {name:"Bill"})-[:HAS_REGISTERED*1..3]-(i :Instructor)) return length(p)
+match p=shortestPath((s :Student {name:"Bill"})-[:HAS_REGISTERED*1..3]-(i :Instructor {name:"Bruce"})) return p
+match p=allShortestPaths((s :Student {name:"Bill"})-[:HAS_REGISTERED*1..3]-(i :Instructor {name:"Bruce"})) return length(p)
+
+*** Text Searching
+match (c :Course {title:"Spring Framework (Core) Part:2"}) return c
+
+-- nice
+match (c :Course) where c.title = "Spring Framework (Core) Part:2" return c
+match (c :Course) where c.title =~ "Spring.*" return c
+match (c :Course) where c.title =~ ".*Framework.*" return c
+match (c :Course) where c.title =~ ".*[Ff]ramework.*" return c
+match (c :Course) where c.title =~ "(?i).*framework(s)?.*" return c
+
+*** Predicates
+match (c :Course)<-[pb :PUBLISHED]-(p :Provider) return c.title, pb.year, p.name
+match (c :Course)<-[pb :PUBLISHED]-(p :Provider) where pb.year = 2012 return c.title, pb.year, p.name
+match (c :Course)<-[pb :PUBLISHED]-(p :Provider) where pb.year <> 2012 return c.title, pb.year, p.name
+match (c :Course)<-[pb :PUBLISHED]-(p :Provider) where pb.year in [2012,2013,2014]  return c.title, pb.year, p.name
+match (c :Course)<-[pb :PUBLISHED]-(p :Provider) where pb.year = 2012 or pb.year=2013 or pb.year=2014  return c.title, pb.year, p.name
+match (c :Course)<-[:PUBLISHED]-(:Provider {name:"Udemy.com"}) return c
+match (c :Course)<-[:PUBLISHED]-(:Provider {name:"Udemy.com"}) where ALL(tag IN c.tags where tag IN ["java", "programming language"]) return c
+match (c :Course)<-[:PUBLISHED]-(:Provider {name:"Udemy.com"}) where NONE(tag IN c.tags where tag IN ["java"]) return c
+match (c :Course)<-[:PUBLISHED]-(:Provider {name:"Udemy.com"}) where SINGLE(tag IN c.tags where tag IN ["neo4j"]) return c
+match (c :Course)<-[:PUBLISHED]-(:Provider {name:"Udemy.com"}) where SINGLE(tag IN c.tags where tag IN ["neo4j", "java"]) return c
+
+*** Sorting
+match (c :Course) where any(tag IN c.tags where tag IN ["java"]) return c.code, c.title order by c.code
+match (c :Course) where any(tag IN c.tags where tag IN ["java"]) return c.code, c.title order by c.code desc
+match (c :Course) where any(tag IN c.tags where tag IN ["java"]) return c.code, c.title order by c.code desc limit 5
+match (c :Course {code:"11001"})<-[r :PUBLISHED]-(:Provider) return c, r
+match (c :Course {code:"11001"})<-[r :PUBLISHED]-(:Provider) delete r
+match (c :Course) optional match(c)<-[r :PUBLISHED]-(:Provider) return c.title, r order by r.year desc
+match (c :Course) optional match(c)<-[r :PUBLISHED]-(:Provider) return c.title, r order by r.year limit 5
+match (c :Course) optional match(c)<-[r :PUBLISHED]-(:Provider) return c.title, r order by r.year desc limit 5
+match (c :Course) optional match(c)<-[r :PUBLISHED]-(:Provider) return c.title, r order by COALESCE(r.year,-5000) desc limit 5
+
+*** Conditional Expressions
+match (:Provider)-[pb:PUBLISHED]->(:Course)<-[r:ENROLLED_IN]-(s :Student) return pb.year, AVG(s.age)
+match (:Provider)-[pb:PUBLISHED]->(:Course)<-[r:ENROLLED_IN]-(s :Student) return CASE WHEN pb.year = 2015 THEN "Current Year" ELSE "Past Year" END AS Category, AVG(s.age) as Average
+match (c :Course)<-[r:ENROLLED_IN]-(s :Student) OPTIONAL match (:Provider)-[pb:PUBLISHED]->(c) return pb.year, AVG(s.age)
+match (c :Course)<-[r:ENROLLED_IN]-(s :Student) OPTIONAL match (:Provider)-[pb:PUBLISHED]->(c) return case pb.year % 2 WHEN 0 THEN "Even Years" WHEN 1 THEN "Odds Years" WHEN 2 THEN "UnPublished Years" ELSE "Unknown" END AS Parity, AVG(s.age) as averageAge
+match (c :Course)<-[r:ENROLLED_IN]-(s :Student) OPTIONAL match (:Provider)-[pb:PUBLISHED]->(c) return case COALESCE(pb.year % 2, 2) WHEN 0 THEN "Even Years" WHEN 1 THEN "Odds Years" WHEN 2 THEN "UnPublished Years" ELSE "Unknown" END AS Parity, AVG(s.age) as averageAge
+
+*** Web Development Techniques
+-- paginacion
+match (s :Student) return s.name, s.age order by s.name
+match (s :Student) return s.name, s.age order by s.name limit 2
+match (s :Student) return s.name, s.age order by s.name skip 2 limit 2
+
+:get /db/data
+:get http://localhost:7474/db/data/labels
+
+:post http://localhost:7474/db/data/cypher { "query" : "match (s :Student) return s.name, s.age order by s.name"}
+:post http://localhost:7474/db/data/cypher { "query" : "match (s :Student) return s.name, s.age order by s.name skip 0 limit 2"}
+-- paginacion
+:post http://localhost:7474/db/data/cypher { "query" : "match (s :Student) return s.name, s.age order by s.name skip {skip} limit {limit}", "params" : {"skip" : 0, "limit" : 2}}
+

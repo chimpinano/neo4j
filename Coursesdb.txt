@@ -1,0 +1,169 @@
+//Courses
+CREATE
+	(udemyJava :Course {code: 'udm001', title:'Essential Java for Beginners', level:'Beginners', tags: ['java', 'programming language'], format: 'online self-paced', price: 43, currency: 'USD'}),
+	(udemyJavaBsp :Course {code: 'udm002', title:'Java for Beginners', level:'Beginners', tags: ['java', 'programming language'], format: 'online self-paced', price: 18, currency: 'USD'}),
+	(udemyJavaAndroid :Course {code: 'udm003', title:'Java Android', level:'Beginners', tags: ['java','android', 'programming language'], format: 'online self-paced', price: 47, currency: 'USD'}),
+	(udemyNeo4j :Course {code: 'udm004', title:'Neo4j - Stop Developing Databases the Hard way!', level:'Beginners', tags: ['nosql', 'neo4j', 'database'] , format: 'online self-paced', price: 37, currency: 'USD'}),
+	(udemySpring1 :Course {code: 'udm005', title:'Spring Framework (Core)  Part:1', level:'Beginners', tags: ['spring', 'java'], format: 'online self-paced', price: 37, currency: 'USD'}),
+	(udemySpring2 :Course {code: 'udm006',title:'Spring Framework (Core) Part:2', level:'Intermediate', tags: ['spring', 'java'], format: 'online self-paced',price: 37, currency: 'USD'}),
+	(udemyMaven :Course {code: 'udm007', title:'Apache Maven - Stop Developing Java Programs the Hard way!', level:'Beginners', tags: ['java', 'build tool'], format: 'online self-paced', price: 37, currency: 'USD'}),
+	(denNeo4j :Course {code: 'den001', title:'Neo4j - Stop Developing Databases the Hard way!', level:'Beginners', tags: ['nosql', 'neo4j', 'database'] , format: 'online self-paced', price: 27, currency: 'GBP'}),
+	(denSpring1 :Course {code: 'den002', title:'Spring Framework (Core)  Part:1', level:'Beginners', tags: ['spring', 'java'], format: 'online self-paced', price: 27, currency: 'GBP'}),
+	(denSpring2 :Course {code: 'den003',title:'Spring Framework (Core) Part:2', level:'Intermediate', tags: ['spring', 'java'], format: 'online self-paced',price: 27, currency: 'GBP'}),
+	(denMaven :Course {code: 'den004', title:'Apache Maven - Stop Developing Java Programs the Hard way!', level:'Beginners', tags: ['java', 'build tool'], format: 'online self-paced', price: 27, currency: 'GBP'}),
+	(lsSpring1 :Course {code: 'ls001', title:'Spring Framework (Core)  Part:1', level:'Beginners', tags: ['spring', 'java'], format: 'online self-paced', price: 1250, currency: 'INR'}),
+	(lsSpring2 :Course {code: 'ls002',title:'Spring Framework (Core) Part:2', level:'Intermediate', tags: ['spring', 'java'], format: 'online self-paced',price: 2313, currency: 'INR'}),
+	(prSpring1 :Course {code: 'pr001', title:'Spring Framework (Core)  Part:1', level:'Beginners', tags: ['spring', 'java'], format: 'online self-paced', price: 34, currency: 'EUR'}),
+	(prSpring2 :Course {code: 'pr002',title:'Spring Framework (Core) Part:2', level:'Intermediate', tags: ['spring', 'java'], format: 'online self-paced', price: 47, currency: 'EUR'}),
+	(llandJava121 :Course {code: 'll001',title:'Java for Beginners', level:'Beginners', tags: ['java', 'programming language'], format: 'online live 121', price: 199, currency: 'USD'})
+
+
+//Provider
+CREATE
+	(udemy :Provider {name: 'Udemy.com', location: 'USA'}),
+	(den :Provider {name: 'denOfProgramming.com', location: 'UK'}),
+	(lland :Provider {name: 'Learning Land', location: 'USA'}),
+	(learnSocial :Provider {name: 'LearnSocial.com', location: 'India'}),
+	(parleys :Provider {name: 'Parleys.com', location: 'Belgium'})
+
+// Published relationships
+CREATE 
+	(udemy)-[:PUBLISHED {year: 2015}]->(udemyNeo4j),
+	(udemy)-[:PUBLISHED {year: 2014}]->(udemySpring1),
+	(udemy)-[:PUBLISHED {year: 2014}]->(udemySpring2),
+	(udemy)-[:PUBLISHED {year: 2014}]->(udemyMaven),
+	(udemy)-[:PUBLISHED {year: 2012}]->(udemyJava),
+	(udemy)-[:PUBLISHED {year: 2012}]->(udemyJavaBsp),
+	(udemy)-[:PUBLISHED {year: 2012}]->(udemyJavaAndroid),
+
+	(den)-[:PUBLISHED {year: 2015}]->(denNeo4j),
+	(den)-[:PUBLISHED {year: 2014}]->(denSpring1),
+	(den)-[:PUBLISHED {year: 2014}]->(denSpring2),
+	(den)-[:PUBLISHED {year: 2014}]->(denMaven),
+
+	(learnSocial)-[:PUBLISHED {year: 2015}]->(lsSpring1),
+	(learnSocial)-[:PUBLISHED {year: 2015}]->(lsSpring2),
+
+	(parleys)-[:PUBLISHED {year: 2015}]->(prSpring1),
+	(parleys)-[:PUBLISHED {year: 2015}]->(prSpring2),
+	(lland)-[:PUBLISHED {year: 2015}]->(llandJava121)
+
+// Instructor Nodes
+CREATE
+	(br :Instructor {name:'Bruce', location:'UK'}),
+	(jh :Instructor {name:'John', location:'UK'}),
+	(mk :Instructor {name:'Mike', location:'USA'})
+
+
+// Register Instructors
+CREATE 
+	(udemy)<-[:HAS_REGISTERED]-(br),
+	(den)<-[:HAS_REGISTERED]-(br),
+	(learnSocial)<-[:HAS_REGISTERED]-(br),
+	(parleys)<-[:HAS_REGISTERED]-(br),
+	(udemy)<-[:HAS_REGISTERED]-(jh),
+	(udemy)<-[:HAS_REGISTERED]-(mk),
+	(lland)<-[:HAS_REGISTERED]-(mk)
+
+// Who Instructs the course
+CREATE
+	(br)<-[:INSTRUCTED_BY]-(udemyNeo4j),
+	(br)<-[:INSTRUCTED_BY]-(udemySpring1),
+	(br)<-[:INSTRUCTED_BY]-(udemySpring2),
+	(br)<-[:INSTRUCTED_BY]-(udemyMaven),
+	(jh)<-[:INSTRUCTED_BY]-(udemyJavaAndroid),
+	(mk)<-[:INSTRUCTED_BY]-(udemyJavaBsp),
+	(mk)<-[:INSTRUCTED_BY]-(udemyJava),
+	(br)<-[:INSTRUCTED_BY]-(denNeo4j),
+	(br)<-[:INSTRUCTED_BY]-(denSpring1),
+	(br)<-[:INSTRUCTED_BY]-(denSpring2),
+	(br)<-[:INSTRUCTED_BY]-(denMaven),
+	(br)<-[:INSTRUCTED_BY]-(lsSpring1),
+	(br)<-[:INSTRUCTED_BY]-(lsSpring2),
+	(br)<-[:INSTRUCTED_BY]-(prSpring1),
+	(br)<-[:INSTRUCTED_BY]-(prSpring2),
+	(mk)<-[:INSTRUCTED_BY]-(llandJava121)
+
+	
+// Students
+CREATE (ji :Student {name:'Jilian', age:23, location:'USA'}),
+	(jn :Student {name:'Jane', age:23, location:'USA'}),
+	(joh :Student {name:'Jonathan', age:25, location:'USA'}),
+	(bl :Student {name:'Bill', age:24, location:'USA'}),
+	(la :Student {name:'Laure', age:20, location:'FR'}),
+	(dv :Student {name:'Davide', age:26, location:'FR'}),
+	(sa :Student {name:'Sara', age:22, location:'UK'}),
+	(tm :Student {name:'Thomas', age:21, location:'UK'}),
+	(ja :Student {name:'Jack', age:24, location:'UK'}),
+	(rav :Student {name:'Ravi', age:36, location:'IN'}),
+	(sri :Student {name:'Sri', age:25, location:'IN'}),
+	(suri :Student {name:'Suri', age:26, location:'IN'})
+
+
+// Register Students
+CREATE 
+	(udemy)<-[:HAS_REGISTERED]-(ji),
+	(udemy)<-[:HAS_REGISTERED]-(jn),
+	(udemy)<-[:HAS_REGISTERED]-(joh),	
+	(udemy)<-[:HAS_REGISTERED]-(bl),
+
+
+	(den)<-[:HAS_REGISTERED]-(bl),
+	(den)<-[:HAS_REGISTERED]-(sa),
+	(den)<-[:HAS_REGISTERED]-(tm),
+	(den)<-[:HAS_REGISTERED]-(ja),
+
+	(learnSocial)<-[:HAS_REGISTERED]-(rav),
+	(learnSocial)<-[:HAS_REGISTERED]-(sri),
+	(learnSocial)<-[:HAS_REGISTERED]-(suri),
+	(parleys)<-[:HAS_REGISTERED]-(la),
+	(parleys)<-[:HAS_REGISTERED]-(dv),	
+	(lland)<-[:HAS_REGISTERED]-(joh),
+	(lland)<-[:HAS_REGISTERED]-(bl)
+
+
+//Students Enroll in Courses
+//udemy students
+CREATE 
+	(ji)-[:ENROLLED_IN]->(udemyNeo4j),
+	(joh)-[:ENROLLED_IN]->(udemySpring1),
+	(joh)-[:ENROLLED_IN]->(udemySpring2),
+	(joh)-[:ENROLLED_IN]->(udemyJavaAndroid),
+	(joh)-[:ENROLLED_IN]->(udemyJavaBsp),
+	(jn)-[:ENROLLED_IN]->(udemyJava),
+	(jn)-[:ENROLLED_IN]->(udemyJavaAndroid),
+	(jn)-[:ENROLLED_IN]->(udemyMaven),
+	(bl)-[:ENROLLED_IN]->(udemyJava),
+	(bl)-[:ENROLLED_IN]->(udemyMaven),
+
+//den students
+	(bl)-[:ENROLLED_IN]->(denSpring1),
+	(sa)-[:ENROLLED_IN]->(denNeo4j),
+	(sa)-[:ENROLLED_IN]->(denSpring1),
+	(tm)-[:ENROLLED_IN]->(denSpring1),
+	(tm)-[:ENROLLED_IN]->(denSpring2),
+	(tm)-[:ENROLLED_IN]->(denNeo4j),
+	(ja)-[:ENROLLED_IN]->(denSpring1),
+	(ja)-[:ENROLLED_IN]->(denSpring2),
+
+
+//learn social students
+	(sri)-[:ENROLLED_IN]->(lsSpring1),
+	(suri)-[:ENROLLED_IN]->(lsSpring1),
+
+// parleys students
+	(la)-[:ENROLLED_IN]->(prSpring1),
+	(la)-[:ENROLLED_IN]->(prSpring2),
+	(dv)-[:ENROLLED_IN]->(prSpring1),
+	(dv)-[:ENROLLED_IN]->(prSpring2),
+
+// lland guys
+	(joh)-[:ENROLLED_IN]->(llandJava121),
+	(la)-[:ENROLLED_IN]->(llandJava121)
+
+
+
+
+
+
+

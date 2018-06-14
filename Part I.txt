@@ -1,0 +1,113 @@
+https://compudescargatv.blogspot.com/2018/04/curso-capacity-certificacion-redes.html
+
+https://neo4j.com/download/other-releases/
+
+org: username 'neo4j' and password 'neo4j'
+new: username 'neo4j' and password '123'
+
+C:\neo4j\neo4j-community-3.5.0-alpha01\bin> .\neo4j console
+C:\neo4j\neo4j-community-3.5.0-alpha01\bin .\neo4j console
+
+http://127.0.0.1:7474
+
+Nota: neo4j es case sentive
+
+CREATE()
+MATCH (n) RETURN n
+CREATE (n :User) return n
+match (n : User) return n
+create (n :student {name:"Bill",age:21})return n
+create (n :student {name:"Fred",age:19})return n
+create (n :student :Teacher {name:"Tim",age:31})return n
+match (n :student)return n
+match (n :User)return n
+match (n)return n
+match (n)return n.name
+match (n)return n.name, n.age
+match (n :Teacher)return n.name, n.age
+match (n :User)return n.name, n.age
+create (n :Teacher {name:"Josh", age:41}) return n.name, n.age
+match (n) return n
+create (n: student {name:"Jack", age:22, nicknames:["Jacko", "Jackie"]}) return n;
+match (n :student) return n.nicknames
+match (n :student) return n.nicknames[0];
+match (n :student) return n
+match (n :student {name:"Tim"}) return n
+match (n :student {name:"Tim"}) set n.name ="Timothy" return n
+match (n :student {name:"Timothy"}) set n.nicknames =["Ti","Timmy"] return n
+match (n :student) return n.nicknames
+match (n :student) return n.nicknames[0]
+match (n :student) return n
+match (n :student {name:"Fred"}) set n.nicknames =["Freddy","Fre"] return n
+match (n :student {name:"Bill"}) set n.nicknames =["Billy","Billy the kill"] return n
+match (n :student) return n.nicknames
+
+match (n) where n.name="Bill" return n
+match (n :student {name:"Bill"}) return n
+match (n :student) where n.name="Bill" and n.age=21 return n
+match (n :student) where n.name<>"Bill" OR n.age<22 return n
+match (n :student) where not n.age>=22 return n
+
+match (n :student {name:"Timothy"}) remove n:Teacher
+match (n :student {name:"Timothy"}) remove n:Teacher, n:student
+
+match (n {name:"Timothy"}) return n
+
+match (n {name:"Timothy"}) set n:student, n:Teacher return n
+match (n {name:"Timothy"}) set n.address="My address" return n
+match (n {name:"Timothy"}) remove n.address return n
+match (n {name:"Timothy"}) remove n.address, n.age return n
+
+match (n :User) delete n
+
+merge (n :student {name:"James",age:24})
+merge (n :student {name:"James",age:24}) set n.nicknames = ["Jimmy"] return n
+merge (n :student {name:"James",age:24}) on create set n.nicknames = ["Jim"] return n
+match (n :student {name:"James",age:24}) delete  n
+merge (n :student {name:"James",age:24}) on create set n.nicknames = ["Jim"] on match set n.nicknames=["Jimbo"] return n
+
+--------------------------------------------------------------------------------
+1/9 Relationships in Neo4j
+
+match (ja :student {name:"Jack"}), (jm :student {name:"James"}) return ja,jm
+
+match (ja :student {name:"Jack"}), (jm :student {name:"James"}) 
+create (ja)-[r :friend {nicknames:"Jimbo"}]->(jm) 
+return ja,r,jm
+
+match (ja :student {name:"Jack"})-[]-(jm :student {name:"James"}) return ja,jm
+match (ja :student {name:"Jack"})-[r]-(jm :student {name:"James"}) return ja,r,jm
+match (ja :student {name:"Jack"})-[r: friend]->(jm :student {name:"James"}) return ja,r,jm
+match (ja :student {name:"Jack"})<-[r: friend]-(jm :student {name:"James"}) return ja,r,jm
+match (ja :student {name:"Jack"})-[r: friend]-(jm :student {name:"James"}) return ja,r,jm
+match (ja :student {name:"Jack"}),(jm :student {name:"James"}) return ja,jm
+
+match (ja :student {name:"Jack"}),(jm :student {name:"James"}) 
+create (ja)<-[r :friend {nicknames:"Jacko"}]-(jm) 
+return ja,r,jm
+
+match (ja :student {name:"Jack"})-[r :friend]->(jm :student {name:"James"}) return ja,r,jm
+match (ja :student {name:"Jack"})-[r :friend]-(jm :student {name:"James"}) return ja,r,jm
+
+match (ja :student {name:"Jack"})-[r :friend]->(jm :student {name:"James"}) delete r
+match (ja :student {name:"Jack"})-[r :friend]-(jm :student {name:"James"}) delete r
+match (ja :student {name:"Jack"}),(jm :student {name:"James"}) return ja,jm
+
+create p = (j :student {name:"Jilian2", age:23})-[:friend {nickname:"Benji2"}]->(b :student {name:"Ben2", age:23})-[:friend {nickname:"Jill2"}]->(j) return p
+match (:student {name:"Jilian2"})-[r:friend]->(:student {name:"Ben2"}) return r
+match (:student {name:"Jilian2"})<-[r:friend]-(:student {name:"Ben2"}) return r
+match (:student {name:"Jilian2"})<-[r:friend]-(:student {name:"Ben2"}) set r.nickname = "Jilly2" return r
+match (:student {name:"Jilian2"})-[r:friend]-(:student {name:"Ben2"}) return r
+
+match (j :student {name:"Jilian2"}),(b :student {name:"Ben2"}) merge(j)<-[r1 :classmate]-(b) merge(j)-[r2 :classmate]->(b) return j,b,type(r1),r1,type(r2),r2
+match (j :student {name:"Jilian2"})-[r]-(b :student {name:"Ben2"}) return j,type(r),r,b
+match (j :student {name:"Jilian2"}),(b :student {name:"Ben2"}) create(j)<-[r1 :classmate]-(b) create(j)-[r2 :classmate]->(b) return j,b,type(r1),r1,type(r2),r2
+
+match (j :student {name:"Jilian2"}) merge(d :student {name:"Dave2", age:25}) merge(j)<-[r1 :classmate]-(d) merge(j)-[r2 :classmate]->(d) return j,d,type(r1),r1,type(r2),r2
+match (j :student {name:"Jilian2"})-[r]-(b :student {name:"Dave2"}) return j,type(r),r,b
+
+match (j :student {name:"Jilian2"})-[r]-(s) return j,type(r),s
+match (n :student {name:"Ben2"})-[r :classmate]-(j :student {name:"Jilian2"}) delete r
+
+match (j :student {name:"Jilian2"}) create unique (j)-[r :friend]->(d :student {name:"Dave2", age: 25}) return j, type(r), d
+match (j :student {name:"Jilian2"})-[r]-(s) return j,type(r),s
